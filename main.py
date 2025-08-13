@@ -12,7 +12,7 @@ import requests
 mcp = FastMCP("Demo")
 
 # Your WeatherAPI key (replace with your own)
-API_KEY = "5cff526d514b453cbc6215809251308"
+API_KEY = "5cff526d514b453cbc6215809251308" # expired (dont try using this)
 BASE_URL = "http://api.weatherapi.com/v1/current.json"
 
 # Add an addition tool
