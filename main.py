@@ -7,6 +7,7 @@ cd to the `examples/snippets/clients` directory and run:
 
 from mcp.server.fastmcp import FastMCP
 import requests
+from typing import List, Dict
 
 # Create an MCP server
 mcp = FastMCP("Demo")
@@ -48,21 +49,57 @@ def get_weather(city: str) -> dict:
         data = response.json()
         
         # Extract relevant weather data
-        # weather = {
-        #     "city": data["location"]["name"],
-        #     "region": data["location"]["region"],
-        #     "country": data["location"]["country"],
-        #     "temperature_c": data["current"]["temp_c"],  # Celsius
-        #     "temperature_f": data["current"]["temp_f"],  # Fahrenheit
-        #     "condition": data["current"]["condition"]["text"],
-        #     "humidity": data["current"]["humidity"],
-        #     "wind_kph": data["current"]["wind_kph"],  # wind speed in km/h
-        #     "precip_mm": data["current"]["precip_mm"],  # precipitation in mm
-        # }
+        weather = {
+            "city": data["location"]["name"],
+            "region": data["location"]["region"],
+            "country": data["location"]["country"],
+            "temperature_c": data["current"]["temp_c"],  # Celsius
+            "temperature_f": data["current"]["temp_f"],  # Fahrenheit
+            "condition": data["current"]["condition"]["text"],
+            "humidity": data["current"]["humidity"],
+            "wind_kph": data["current"]["wind_kph"],  # wind speed in km/h
+            "precip_mm": data["current"]["precip_mm"],  # precipitation in mm
+        }
         
         return data
     else:
         return {"error": "Could not fetch weather data: " + url}
+
+NEWS_API_KEY = "97489af27d6f4e18bd90c0385a39e510"
+BASE_URL_NEWS = "https://newsapi.org/v2/everything"
+
+# News API tool
+@mcp.tool()
+def get_news(query: str = "Apple", from_date: str = "2025-08-14", sort_by: str = "popularity") -> List[Dict]:
+    """Latest news articles based on a keyword and date."""
+    
+    params = {
+        "q": query,
+        "from": from_date,
+        "sortBy": sort_by,
+        "apiKey": NEWS_API_KEY
+    }
+    
+    url = f"{BASE_URL_NEWS}?q={query}&from={from_date}&sortBy={sort_by}&apiKey={NEWS_API_KEY}"
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        articles = response.json().get("articles", [])
+        
+        # Simplify and return relevant article information
+        return [
+            {
+                "title": article["title"],
+                "description": article["description"],
+                "url": article["url"],
+                "source": article["source"]["name"],
+                "publishedAt": article["publishedAt"]
+            }
+            for article in articles
+        ]
+    else:
+        return [{"error": f"Failed to fetch news. Status code: {response.status_code} and url: {url}"}]
+
 
 # Add a prompt
 @mcp.prompt()
